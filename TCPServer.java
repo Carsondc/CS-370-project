@@ -1,11 +1,14 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class TCPServer {
     private static int port;
+    final private static String PASSWORD = "potato";
     public static void main(String[] args) {
         port = Integer.parseInt(args[0]);
 
@@ -15,12 +18,23 @@ public class TCPServer {
             ServerSocket servSocket = new ServerSocket(port);
             Socket clientSocket = servSocket.accept();
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            System.out.println("Clients Connected!");
-            String message = "";
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+            System.out.println("Client Connected");
+            if (!in.readLine().equals(PASSWORD)) {
+                out.write(0);
+                out.flush();
+                System.out.println("Passwrod incorrect");
+                servSocket.close();
+                return;
+            }
+            out.write(1);
+            out.flush();
+            System.out.println("Correct");
+            String message;
             while ((message = in.readLine()) != null) {
                 System.out.println(message);
             }
-            System.out.println("Finished listening for client messages.");
+            System.out.println("Finished listening for messages.");
             servSocket.close();
             clientSocket.close();
             in.close();

@@ -16,9 +16,21 @@ public class TCPClient {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             
+            String message;
             System.out.println("Connected");
             Scanner scan = new Scanner(System.in);
-            String message = "";
+            System.out.print("Please enter password: ");
+            message = scan.nextLine();
+            out.write(message);
+            out.newLine();
+            out.flush();
+            if (in.read() == 0) {
+                System.out.println("Incorrect");
+                scan.close();
+                socket.close();
+                return;
+            }
+            System.out.println("Correct");
             do {
                 message = scan.nextLine();
                 out.write(message);
