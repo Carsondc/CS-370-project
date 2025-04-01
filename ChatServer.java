@@ -6,7 +6,7 @@ import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class TCPServer {
+public class ChatServer {
     private static int port;
     final private static String PASSWORD = "potato";
     public static void main(String[] args) {
@@ -23,7 +23,7 @@ public class TCPServer {
             if (!in.readLine().equals(PASSWORD)) {
                 out.write(0);
                 out.flush();
-                System.out.println("Passwrod incorrect");
+                System.out.println("Password incorrect");
                 servSocket.close();
                 return;
             }

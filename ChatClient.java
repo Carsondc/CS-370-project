@@ -6,7 +6,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class TCPClient {
+public class ChatClient {
 
     public static void main(String[] args) {
         try {
