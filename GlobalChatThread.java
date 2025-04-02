@@ -5,11 +5,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
-public class ChatThread implements Runnable {
+public class GlobalChatThread implements Runnable {
     private Socket clientSocket;
     private BufferedReader in;
     private BufferedWriter out;
-    public ChatThread(Socket clientSocket) {
+    public GlobalChatThread(Socket clientSocket) {
         try {
             this.clientSocket = clientSocket;
             this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
