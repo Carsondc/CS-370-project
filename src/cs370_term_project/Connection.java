@@ -7,9 +7,10 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 public class Connection implements Runnable{
-	private Socket socket;
-	private BufferedReader in;
-	private BufferedWriter out;
+	protected Socket socket;
+	protected BufferedReader in;
+	protected BufferedWriter out;
+	protected String username;
 	private ConnectionHandler caster;
 	public Connection(Socket socket, ConnectionHandler caster) {
 		try {
@@ -17,6 +18,7 @@ public class Connection implements Runnable{
 			this.caster = caster;
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+			username = socket.getInetAddress().toString() + ":" + socket.getPort();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -55,5 +57,11 @@ public class Connection implements Runnable{
 			message = readMessage();
 		}
 		caster.remove(this);
+	}
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String newUsername) {
+		username = newUsername;
 	}
 }

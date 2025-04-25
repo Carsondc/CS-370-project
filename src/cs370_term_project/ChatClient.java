@@ -8,19 +8,15 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class ChatClient {
-	private static String username;
 	public static void main(String[] args) {
 		try {
-			Thread.sleep(1000); //1 second delay
 			Socket socket = new Socket(args[0], Integer.parseInt(args[1]));
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 			Scanner scan = new Scanner(System.in);
 			
-			String message;
-			System.out.println("Connected");
 			System.out.print("Please enter password: ");
-			message = scan.nextLine();
+			String message = scan.nextLine();
 			out.write(message);
 			out.newLine();
 			out.flush();
@@ -30,14 +26,9 @@ public class ChatClient {
 				socket.close();
 				return;
 			}
-//			System.out.println("Correct");
-//			System.out.print("Please enter chosen username: ");
-//			username = scan.nextLine();
-//			out.write(message);
-//			out.newLine();
-//			out.flush();
+			//Print out incoming messages
 			new Thread(() -> {
-				String incoming = "";
+				String incoming;
 				while(!socket.isClosed()) {
 					try {
 						incoming = in.readLine();
@@ -45,6 +36,7 @@ public class ChatClient {
 					} catch (IOException e) {}
 				}
 			}).start();
+			
 			message = scan.nextLine();
 			while (!message.equals("exit")) {
 				out.write(message);
@@ -54,7 +46,7 @@ public class ChatClient {
 			}
 			scan.close();
 			socket.close();
-		} catch (IOException | InterruptedException e) {
+		} catch (IOException e) {
 			System.out.println(e.getMessage());
 		}
 	}

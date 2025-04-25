@@ -16,20 +16,14 @@ public class ChatServer {
 		try {
 			servSocket = new ServerSocket(port);
 			handler = new ConnectionHandler(servSocket);
+			new Thread(handler).start();
 		} catch (IOException e) {}
-		
-//		new Thread(() -> {
-//			while(!servSocket.isClosed()) {
-//				
-//			}
-//		}).start();
 	}
 	
 	public void close() {
 		try {
 			servSocket.close();
 			handler.closeAll();
-			
 		} catch (IOException e) {}
 	}
 	
