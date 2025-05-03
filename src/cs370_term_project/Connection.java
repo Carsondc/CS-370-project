@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
-public class Connection implements Runnable{
+public class Connection implements Runnable {
 	protected Socket socket;
 	protected BufferedReader in;
 	protected BufferedWriter out;
@@ -23,11 +23,15 @@ public class Connection implements Runnable{
 			e.printStackTrace();
 		}
 	}
-	public void disconnect() {
+	//May be called from various sources
+	public synchronized void disconnect() {
+		if (socket.isClosed()) return;
 		try {
+			caster.remove(this);
 			in.close();
 			out.close();
 			socket.close();
+			System.out.println(username + " disconnected.");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -45,18 +49,18 @@ public class Connection implements Runnable{
 		try {
 			return in.readLine();
 		} catch (IOException e) {
-			e.printStackTrace();
+			disconnect();
 		}
 		return null;
 	}
 	@Override
 	public void run() {
-		String message = readMessage();
-		while(!socket.isClosed() && message != null) {
+		while(true) {
+			String message = readMessage();
+			if (socket.isClosed() || message == null) break;
 			caster.broadcast(message, this);
-			message = readMessage();
 		}
-		caster.remove(this);
+		disconnect();
 	}
 	public String getUsername() {
 		return username;

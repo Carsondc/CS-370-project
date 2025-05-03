@@ -39,17 +39,22 @@ public class ChatClient {
 				while(!socket.isClosed()) {
 					try {
 						incoming = in.readLine();
+						if (incoming.equals("cease")) {
+							System.err.println("You were kicked.");
+							System.exit(0);
+						}
 						System.out.println(incoming);
 					} catch (IOException e) {}
 				}
 			}).start();
 			
-			message = scan.nextLine();
-			while (!message.equals("exit")) {
+			while (true) {
+				message = scan.nextLine();
+				if (message.equals("exit")) break;
+				if (message.isEmpty()) continue;
 				out.write(message);
 				out.newLine();
 				out.flush();
-				message = scan.nextLine();
 			}
 			scan.close();
 			socket.close();
