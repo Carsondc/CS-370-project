@@ -1,5 +1,4 @@
 package cs370_term_project;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -41,7 +40,7 @@ public class ConnectionHandler implements Runnable{
 					System.out.println(newConn.getUsername() + " has verified w. password.");
 					newConn.sendMessage("Would you like to enter a username? (y)");
 					String answer = newConn.readMessage().toLowerCase();
-					if (answer.contains("y") || answer.isBlank()) {
+					if (answer.contains("y") || answer.isEmpty()) {
 						newConn.sendMessage("Please enter a username: ");
 						newConn.setUsername(newConn.readMessage());
 					}

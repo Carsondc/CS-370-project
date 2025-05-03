@@ -10,10 +10,17 @@ import java.util.Scanner;
 public class ChatClient {
 	public static void main(String[] args) {
 		try {
-			Socket socket = new Socket(args[0], Integer.parseInt(args[1]));
+			Scanner scan = new Scanner(System.in);
+			System.out.print("Enter Hostname: ");
+			String host = scan.nextLine();
+			System.out.print("Enter Remote Port Number (4880): ");
+			String temp = scan.nextLine();
+			int port = 4880;
+			if (!temp.isEmpty()) port = Integer.parseInt(temp);
+			
+			Socket socket = new Socket(host, port);
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-			Scanner scan = new Scanner(System.in);
 			
 			System.out.print("Please enter password: ");
 			String message = scan.nextLine();

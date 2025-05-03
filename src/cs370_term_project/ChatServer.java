@@ -1,20 +1,18 @@
 package cs370_term_project;
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.Socket;
 
 public class ChatServer {
-	final private static String PASSWORD = "potato";
+	private static String PASSWORD;
 	
-	private int port;
 	private ServerSocket servSocket;
 	private ConnectionHandler handler;
 	
-	public ChatServer(int port) {
-		this.port = port;
+	public ChatServer(int port, String password) {
 		if (port <= 1024 || port > 65535) System.exit(0);
 		try {
 			servSocket = new ServerSocket(port);
+			PASSWORD = password;
 			handler = new ConnectionHandler(servSocket);
 			new Thread(handler).start();
 		} catch (IOException e) {}
