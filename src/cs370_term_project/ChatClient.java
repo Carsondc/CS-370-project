@@ -57,7 +57,8 @@ public class ChatClient {
 			
 			System.out.print("Please enter password: ");
 			String message = scan.nextLine();
-			out.write(message);
+			//out.write(message);
+			out.write(encrypt(message));
 			out.newLine();
 			out.flush();
 			if (in.readLine().equals("Password incorrect")) {
@@ -94,7 +95,16 @@ public class ChatClient {
 				message = scan.nextLine();
 				if (message.equals("exit")) break;
 				if (message.isEmpty()) continue;
-				out.write(encrypt(message));
+				//out.write(encrypt(message));
+				if (message.equals("Password correct") ||
+	message.equals("Password incorrect") ||
+	message.equals("Would you like to enter a username? (y)") ||
+	message.equals("Please enter a username (no spaces): ") ||
+	message.equals("cease")) {
+	out.write(message);
+} else {
+	out.write(encrypt(message));
+}
 				out.newLine();
 				out.flush();
 			}

@@ -80,13 +80,24 @@ private String decrypt(String encryptedMessage) {
 			e.printStackTrace();
 		}
 	}
+	private boolean isControlMessage(String msg) {
+		return msg.equals("cease") ||
+			   msg.equals("Password correct") ||
+			   msg.equals("Password incorrect") ||
+			   msg.equals("Would you like to enter a username? (y)") ||
+			   msg.equals("Please enter a username (no spaces): ");
+	}
+	
 	public String readMessage() {
 		try {
 			String encryptedMessage = in.readLine();
 			if (encryptedMessage == null) return null;
 			// Special case for "cease" command that should not be encrypted
-			if (encryptedMessage.equals("cease")) return encryptedMessage;
-			return decrypt(encryptedMessage);
+			// if (encryptedMessage.equals("cease")) return encryptedMessage;
+			// return decrypt(encryptedMessage);
+			if (isControlMessage(encryptedMessage)) return encryptedMessage;
+return decrypt(encryptedMessage);
+
 		} catch (IOException e) {
 			disconnect();
 		}
