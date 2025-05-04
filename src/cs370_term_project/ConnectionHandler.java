@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.TreeMap;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +22,26 @@ public class ConnectionHandler implements Runnable{
 		connections.remove(c);
 		users.remove(c.getUsername());
 	}
+	private Set<String> bannedUsers = new HashSet<>();
+
+public String ban(String username) {
+	if (bannedUsers.contains(username)) return username + " is already banned.";
+	bannedUsers.add(username);
+	kick(username); // Optional: immediately disconnect user
+	return username + " has been banned.";
+}
+
+public String unban(String username) {
+	if (!bannedUsers.contains(username)) return username + " is not banned.";
+	bannedUsers.remove(username);
+	return username + " has been unbanned.";
+}
+
+public Set<String> getBannedUsers() {
+	return Collections.unmodifiableSet(bannedUsers);
+}
+
+
 	public String kick(String username) {
 		Connection c = users.get(username);
 		if (c == null) return "User " + username + " not found.";
@@ -36,7 +57,9 @@ public class ConnectionHandler implements Runnable{
 	@Override
 	public void run() {
 		while(!servSocket.isClosed()) {
-			awaitConnection();
+			if (!ChatServer.isLocked() || connections.isEmpty()) {
+				awaitConnection();
+			} 
 		}
 	}
 	public void awaitConnection() {
@@ -45,6 +68,13 @@ public class ConnectionHandler implements Runnable{
 			//Run as a separate thread due to waiting for user input.
 			new Thread(() -> {
 				Connection newConn = new Connection(newClient, this);
+				// check if server is locked
+				System.out.println("Is sever locked? " + ChatServer.isLocked());
+				if (ChatServer.isLocked()) {
+					newConn.sendMessage("Server is locked. No new connections will be accepted.");
+					newConn.disconnect();
+					return;
+				}
 				System.out.println(newConn.getUsername() + " connected, awaiting password");
 				if (ChatServer.verifyPassword(newConn.readMessage())) {
 					newConn.sendMessage("Password correct");

@@ -8,6 +8,17 @@ public class ChatServer {
 	private ServerSocket servSocket;
 	private ConnectionHandler handler;
 	private CommandParser parser;
+
+	private static boolean locked = false;
+
+public static boolean isLocked() {
+	return locked;
+}
+
+public static void setLocked(boolean lock) {
+	locked = lock;
+}
+
 	
 	public ChatServer(int port, String password) {
 		if (port <= 1024 || port > 65535) System.exit(0);
