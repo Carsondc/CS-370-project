@@ -9,6 +9,7 @@ import java.util.Base64;
 
 public class Connection implements Runnable {
 	private static final String ENCRYPTION_KEY = "SimpleEncryptionKey";
+	private static final byte[] key = ENCRYPTION_KEY.getBytes();;
 	protected Socket socket;
 	protected BufferedReader in;
 	protected BufferedWriter out;
@@ -27,7 +28,6 @@ public class Connection implements Runnable {
 	}
 	private String encrypt(String message) {
     try {
-        byte[] key = ENCRYPTION_KEY.getBytes();
         // Use simple XOR encryption
         byte[] messageBytes = message.getBytes();
         byte[] encryptedBytes = new byte[messageBytes.length];
@@ -36,27 +36,24 @@ public class Connection implements Runnable {
         }
         // Convert to Base64 for safe transmission
         return Base64.getEncoder().encodeToString(encryptedBytes);
-    } catch (Exception e) {
-        e.printStackTrace();
-        return message; // Fallback to plain text
-    }
-}
-private String decrypt(String encryptedMessage) {
-    try {
-        byte[] key = ENCRYPTION_KEY.getBytes();
-        // Decode from Base64
-        byte[] encryptedBytes = Base64.getDecoder().decode(encryptedMessage);
-        byte[] decryptedBytes = new byte[encryptedBytes.length];
-        // Use XOR to decrypt
-        for (int i = 0; i < encryptedBytes.length; i++) {
-            decryptedBytes[i] = (byte) (encryptedBytes[i] ^ key[i % key.length]);
-        }
-        return new String(decryptedBytes);
-    } catch (Exception e) {
-        e.printStackTrace();
-        return encryptedMessage; // Fallback to the original message
-    }
-}
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return message; // Fallback to plain text
+	    }
+	}
+	private String decrypt(String encryptedMessage) {
+	    try {
+	        byte[] encryptedBytes = Base64.getDecoder().decode(encryptedMessage);
+	        byte[] decryptedBytes = new byte[encryptedBytes.length];
+	        for (int i = 0; i < encryptedBytes.length; i++) {
+	            decryptedBytes[i] = (byte) (encryptedBytes[i] ^ key[i % key.length]);
+	        }
+	        return new String(decryptedBytes);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return encryptedMessage;
+	    }
+	}
 	//May be called from various sources
 	public synchronized void disconnect() {
 		if (socket.isClosed()) return;
@@ -76,29 +73,13 @@ private String decrypt(String encryptedMessage) {
 			out.write(encryptedMessage);
 			out.newLine();
 			out.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	private boolean isControlMessage(String msg) {
-		return msg.equals("cease") ||
-			   msg.equals("Password correct") ||
-			   msg.equals("Password incorrect") ||
-			   msg.equals("Would you like to enter a username? (y)") ||
-			   msg.equals("Please enter a username (no spaces): ");
+		} catch (IOException e) {}
 	}
 	
 	public String readMessage() {
 		try {
-			String encryptedMessage = in.readLine();
-			if (encryptedMessage == null) return null;
-			// Special case for "cease" command that should not be encrypted
-			// if (encryptedMessage.equals("cease")) return encryptedMessage;
-			// return decrypt(encryptedMessage);
-			if (isControlMessage(encryptedMessage)) return encryptedMessage;
-return decrypt(encryptedMessage);
-
-		} catch (IOException e) {
+			return decrypt(in.readLine());
+		} catch (IOException | NullPointerException e) {
 			disconnect();
 		}
 		return null;

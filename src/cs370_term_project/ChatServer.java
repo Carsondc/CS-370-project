@@ -4,26 +4,29 @@ import java.net.ServerSocket;
 
 public class ChatServer {
 	private static String password;
-	
-	private ServerSocket servSocket;
-	private ConnectionHandler handler;
-	private CommandParser parser;
-
 	private static boolean locked = false;
+	
+	private static ServerSocket servSocket;
+	private static ConnectionHandler handler;
+	private static CommandParser parser;
 
-public static boolean isLocked() {
-	return locked;
-}
-
-public static void setLocked(boolean lock) {
-	locked = lock;
-}
+	public static boolean isLocked() {
+		return locked;
+	}
+	public static void lock() {
+		locked = true;
+		handler.closeAllPending();
+	}
+	public static void unlock() {
+		locked = false;
+	}
 
 	
-	public ChatServer(int port, String password) {
+	public static void begin(int port, String password) {
 		if (port <= 1024 || port > 65535) System.exit(0);
 		try {
 			servSocket = new ServerSocket(port);
+			servSocket.setSoTimeout(1000);
 			ChatServer.password = password;
 			handler = new ConnectionHandler(servSocket);
 			new Thread(handler).start();
@@ -36,7 +39,7 @@ public static void setLocked(boolean lock) {
 		} catch (IOException | InterruptedException e) {}
 	}
 	
-	public void close() {
+	public static void close() {
 		try {
 			servSocket.close();
 			handler.closeAll();

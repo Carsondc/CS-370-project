@@ -4,8 +4,6 @@ import java.util.TreeMap;
 import java.util.Map;
 import java.util.Scanner;
 
-import java.util.*;
-
 public class CommandParser implements Runnable {
 	public static final Map<String, String> CMDLIST;
 	static {
@@ -58,7 +56,7 @@ public class CommandParser implements Runnable {
 					break;
 
 				case "kick":
-					if (command.length < 2 || command[1].isBlank())
+					if (command.length < 2 || command[1].isEmpty())
 						log("Missing argument: username");
 					else
 						log(handler.kick(command[1].trim()));
@@ -69,7 +67,7 @@ public class CommandParser implements Runnable {
 					break;
 
 				case "broadcast":
-					if (command.length < 2 || command[1].isBlank()) {
+					if (command.length < 2 || command[1].isEmpty()) {
 						log("Missing message to broadcast.");
 					} else {
 						handler.broadcast("[SERVER]: " + command[1].trim());
@@ -78,12 +76,12 @@ public class CommandParser implements Runnable {
 					break;
 
 				case "lock":
-					ChatServer.setLocked(true);
+					ChatServer.lock();
 					log("Server is now locked. New users cannot join.");
 					break;
 
 				case "unlock":
-					ChatServer.setLocked(false);
+					ChatServer.unlock();
 					log("Server is now unlocked. New users may join.");
 					break;
 

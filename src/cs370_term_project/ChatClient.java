@@ -9,9 +9,10 @@ import java.util.Scanner;
 import java.util.Base64;
 
 public class ChatClient {
+	private static final String ENCRYPTION_KEY = "SimpleEncryptionKey";
+	private static final byte[] key = ENCRYPTION_KEY.getBytes();
 	private static String decrypt(String encryptedMessage) {
 		try {
-			byte[] key = "SimpleEncryptionKey".getBytes();
 			byte[] encryptedBytes = Base64.getDecoder().decode(encryptedMessage);
 			byte[] decryptedBytes = new byte[encryptedBytes.length];
 			for (int i = 0; i < encryptedBytes.length; i++) {
@@ -25,7 +26,6 @@ public class ChatClient {
 	}
 	private static String encrypt(String message) {
 		try {
-			byte[] key = "SimpleEncryptionKey".getBytes();
 			byte[] messageBytes = message.getBytes();
 			byte[] encryptedBytes = new byte[messageBytes.length];
 			for (int i = 0; i < messageBytes.length; i++) {
@@ -39,11 +39,6 @@ public class ChatClient {
 	}
 	public static void main(String[] args) {
 		try {
-			// check if not locked
-			if (ChatServer.isLocked()) {
-				System.out.println("Server is locked. Please try again later.");
-				return;
-			}
 			Scanner scan = new Scanner(System.in);
 			System.out.print("Enter Hostname: ");
 			String host = scan.nextLine();
@@ -56,54 +51,33 @@ public class ChatClient {
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 			
-			System.out.print("Please enter password: ");
-			String message = scan.nextLine();
-			out.write(encrypt(message));
-			out.newLine();
-			out.flush();
-			if (in.readLine().equals("Password incorrect")) {
-				System.out.println("Incorrect");
-				scan.close();
-				socket.close();
-				return;
-			}
-			new Thread(() -> {
-				String incoming;
+			Thread incomingMessages  = new Thread(() -> {
 				while(!socket.isClosed()) {
 					try {
-						incoming = in.readLine();
-						if (incoming == null) continue;
-						if (incoming.equals("cease")) {
-							System.err.println("You were kicked.");
-							System.exit(0);
-						}
-						if (incoming.equals("Password correct") || 
-							incoming.equals("Password incorrect") ||
-							incoming.equals("Would you like to enter a username? (y)") ||
-							incoming.equals("Please enter a username (no spaces): ")) {
-							System.out.println(incoming);
-						} else {
-							System.out.println(decrypt(incoming));
-						}
-					} catch (IOException e) {}
+						String inc = in.readLine();
+						if (inc == null) throw new NullPointerException();
+						String incoming = decrypt(inc);
+						System.out.println(incoming);
+						if (incoming.equals("You were kicked.")) System.exit(0);
+					} catch (IOException | NullPointerException e) {
+						System.err.println("You disconnected.");
+						break;
+					}
 				}
-			}).start();
-			
-			while (true) {
-				message = scan.nextLine();
-				if (message.equals("exit")) break;
-				if (message.isEmpty()) continue;
-				if (message.equals("Password correct") ||
-	message.equals("Password incorrect") ||
-	message.equals("Would you like to enter a username? (y)") ||
-	message.equals("Please enter a username (no spaces): ") ||
-	message.equals("cease")) {
-	out.write(message);
-} else {
-	out.write(encrypt(message));
-}
-				out.newLine();
-				out.flush();
+			});
+			incomingMessages.start();
+			while (!socket.isClosed()) {
+				try {
+					String message = scan.nextLine();
+					if (message.equals("exit")) break;
+					if (message.isEmpty()) continue;
+					out.write(encrypt(message));
+					out.newLine();
+					out.flush();
+				} catch (NullPointerException n) {
+					System.err.println("You disconnected.");
+					break;
+				}
 			}
 			scan.close();
 			socket.close();
