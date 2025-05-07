@@ -28,17 +28,15 @@ public class Connection implements Runnable {
 	}
 	private String encrypt(String message) {
     try {
-        // Use simple XOR encryption
         byte[] messageBytes = message.getBytes();
         byte[] encryptedBytes = new byte[messageBytes.length];
         for (int i = 0; i < messageBytes.length; i++) {
             encryptedBytes[i] = (byte) (messageBytes[i] ^ key[i % key.length]);
         }
-        // Convert to Base64 for safe transmission
         return Base64.getEncoder().encodeToString(encryptedBytes);
 	    } catch (Exception e) {
 	        e.printStackTrace();
-	        return message; // Fallback to plain text
+	        return message; 
 	    }
 	}
 	private String decrypt(String encryptedMessage) {
